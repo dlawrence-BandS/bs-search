@@ -123,6 +123,44 @@ canvas{max-width:100%}
 .modal .field input{width:100%;border:1px solid #cfd5e1;border-radius:8px;padding:8px 10px}
 
 footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
+.mini-btn{background:#fff;border:1px solid #cfd5e1;border-radius:8px;padding:0 10px;font-size:13px;color:var(--navy)}
+.mini-btn:hover{background:#f0f3f9}
+.qdrill{cursor:pointer;border-bottom:1px dashed #b9c4d8}
+.qdrill:hover{color:var(--m-clicks);border-bottom-color:var(--m-clicks)}
+a.ext{text-decoration:none;color:#9aa3b5;font-size:11px;margin-left:4px}
+a.ext:hover{color:var(--m-clicks)}
+
+/* Drill drawer */
+#drawer-bg{position:fixed;inset:0;background:rgba(15,25,50,.4);display:none;z-index:80}
+#drawer-bg.show{display:block}
+#drawer{position:fixed;top:0;right:-580px;width:560px;max-width:96vw;height:100vh;background:#fff;z-index:90;box-shadow:-8px 0 30px rgba(15,25,50,.2);transition:right .25s ease;display:flex;flex-direction:column}
+#drawer.show{right:0}
+.drawer-head{padding:18px 22px 14px;border-bottom:1px solid var(--line);display:flex;align-items:flex-start;gap:12px}
+.drawer-head .dr-type{font-size:10.5px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--mut)}
+.drawer-head h2{font-size:16px;font-weight:700;word-break:break-word;margin-top:2px}
+.drawer-head button{margin-left:auto;background:none;border:none;font-size:17px;color:var(--mut);flex:none}
+.dr-body{padding:16px 22px;overflow-y:auto}
+.dr-links{font-size:12.5px;margin-bottom:12px}
+.dr-loading{padding:30px;text-align:center;color:var(--mut)}
+
+/* Ask AI */
+#ai-fab{position:fixed;bottom:22px;right:22px;z-index:70;background:var(--navy);color:#fff;border:none;border-radius:26px;padding:13px 22px;font-weight:600;font-size:13.5px;box-shadow:0 6px 18px rgba(20,35,70,.3)}
+#ai-fab:hover{background:var(--navy-d)}
+#ai-panel{position:fixed;bottom:22px;right:22px;width:420px;max-width:94vw;height:560px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(15,25,50,.3);z-index:75;display:none;flex-direction:column;overflow:hidden}
+#ai-panel.show{display:flex}
+.ai-head{background:var(--navy);color:#fff;padding:13px 16px;font-weight:600;font-size:13.5px;display:flex;align-items:center;gap:10px}
+.ai-head button{background:none;border:none;color:#fff;opacity:.8;font-size:12px}
+.ai-head button:hover{opacity:1}
+.ai-head .x{margin-left:auto;font-size:15px}
+.ai-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
+.ai-msg{max-width:88%;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.ai-msg.user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
+.ai-msg.bot{align-self:flex-start;background:#f0f3f9;border-bottom-left-radius:4px}
+.ai-msg.think{align-self:flex-start;color:var(--mut);font-style:italic;padding:4px 13px}
+.ai-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
+.ai-input textarea{flex:1;border:1px solid #cfd5e1;border-radius:10px;padding:9px 11px;resize:none;font-size:13px}
+.ai-input button{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:0 18px;font-weight:600}
+.ai-input button:disabled{opacity:.5}
 </style>
 </head>
 <body>
@@ -162,6 +200,18 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
       <option value="VIDEO">Video</option>
       <option value="ALL">All types</option>
     </select>
+  </div>
+  <div class="ctl">
+    <label>URL filter (regex)</label>
+    <input type="text" id="url-filter" placeholder="e.g. /ercol/" style="min-width:160px">
+  </div>
+  <div class="ctl">
+    <label>Saved views</label>
+    <div style="display:flex;gap:5px">
+      <select id="views-sel"><option value="">All traffic</option></select>
+      <button class="mini-btn" id="view-save" title="Save the current URL filter as a view">★</button>
+      <button class="mini-btn" id="view-del" title="Delete the selected view">✕</button>
+    </div>
   </div>
   <label class="chk"><input type="checkbox" id="cmp-chk" checked> Compare vs previous period</label>
   <button id="run-btn">Run</button>
@@ -248,6 +298,13 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
   <!-- ── OPPORTUNITIES ── -->
   <section class="panel" id="panel-opps">
     <div class="card">
+      <div class="card-head"><div><h3>Needs eyes — week-on-week drops</h3><div class="hint">Queries and pages whose clicks fell &ge;30% in the last 7 days vs the 7 before (min 20 prior clicks)</div></div></div>
+      <div class="grid2">
+        <div class="tbl-wrap" id="tbl-anom-q"></div>
+        <div class="tbl-wrap" id="tbl-anom-p"></div>
+      </div>
+    </div>
+    <div class="card">
       <div class="card-head">
         <div><h3>Striking distance</h3><div class="hint">Queries ranking 4&ndash;15 with 100+ impressions &mdash; the highest-leverage optimisation targets</div></div>
         <div class="tools"><button class="csv-btn" id="sd-csv">Export CSV</button></div>
@@ -276,10 +333,41 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
       <div class="card"><h3>Countries</h3><div class="hint">Top countries by clicks</div><div class="tbl-wrap" id="tbl-country"></div></div>
     </div>
     <div class="card"><h3>Search types</h3><div class="hint">Current period, all search types regardless of the filter above</div><div class="tbl-wrap" id="tbl-stype"></div></div>
+    <div class="card"><h3>Rich result coverage</h3><div class="hint">Share of impressions carrying each search appearance, current period &middot; export data only (appearance flags aren't in the backfill)</div><div class="tbl-wrap" id="tbl-rich"></div></div>
   </section>
 
   <footer>Data: Search Console bulk export &rarr; BigQuery (<span id="ft-ds"></span>) &middot; exports lag live GSC by ~2 days</footer>
 </main>
+
+<!-- Drill-down drawer -->
+<div id="drawer-bg"></div>
+<aside id="drawer">
+  <div class="drawer-head">
+    <div><div class="dr-type" id="dr-type"></div><h2 id="dr-title"></h2></div>
+    <button id="dr-close">✕</button>
+  </div>
+  <div class="dr-body">
+    <div class="dr-links" id="dr-links"></div>
+    <div class="chart-s" style="height:190px;margin-bottom:14px"><canvas id="ch-drill"></canvas></div>
+    <div class="tbl-wrap" id="dr-table"></div>
+  </div>
+</aside>
+
+<!-- Ask AI -->
+<button id="ai-fab">✦ Ask AI</button>
+<div id="ai-panel">
+  <div class="ai-head">✦ Ask about this data
+    <button id="ai-key">API key</button>
+    <button class="x" id="ai-close">✕</button>
+  </div>
+  <div class="ai-msgs" id="ai-msgs">
+    <div class="ai-msg bot">Ask me anything about the loaded search data — e.g. "What should we prioritise this week?" or "Why might clicks have dropped?"</div>
+  </div>
+  <div class="ai-input">
+    <textarea id="ai-q" rows="2" placeholder="Ask a question…"></textarea>
+    <button id="ai-send">Send</button>
+  </div>
+</div>
 
 <!-- Connection modal -->
 <div class="modal-bg" id="modal-bg">
@@ -312,10 +400,13 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
 /* ═══════════════ CONFIG ═══════════════ */
 const PROJECT = 'commanding-air-450109-p0';
 const DATASET = 'searchconsole';
-const T = "`" + PROJECT + "." + DATASET + ".searchdata_site_impression`";
-const U = "`" + PROJECT + "." + DATASET + ".searchdata_url_impression`";
+const RAW_T = "`" + PROJECT + "." + DATASET + ".searchdata_site_impression`";
+const RAW_U = "`" + PROJECT + "." + DATASET + ".searchdata_url_impression`";
+const VIEW_T = "`" + PROJECT + "." + DATASET + ".v_gsc_site`";
+const VIEW_U = "`" + PROJECT + "." + DATASET + ".v_gsc_url`";
+let T = RAW_T, U = RAW_U, usingBackfill = false;
 const DEFAULT_BRAND = "barker|stone\\s*house|b\\s*&\\s*s|barkerand";
-const LS_KEY = 'gsc_sa_key', LS_BRAND = 'gsc_brand_regex', LS_LOC = 'gsc_bq_location';
+const LS_KEY = 'gsc_sa_key', LS_BRAND = 'gsc_brand_regex', LS_LOC = 'gsc_bq_location', LS_VIEWS = 'gsc_saved_views', LS_AI = 'gsc_anthropic_key';
 document.getElementById('ft-ds').textContent = PROJECT + '.' + DATASET;
 
 /* ═══════════════ STATE ═══════════════ */
@@ -433,14 +524,17 @@ async function runQuery(sql){
 }
 
 /* ═══════════════ DATE RANGES ═══════════════ */
-function getRanges(){
+function getRanges(mx){
   const preset = $('preset').value;
+  const cap = mx ? new Date(mx + 'T00:00:00Z') : addDays(new Date(), -3);
   let ce, cs;
   if (preset === 'custom'){
     cs = new Date($('date-from').value + 'T00:00:00Z');
     ce = new Date($('date-to').value + 'T00:00:00Z');
+    if (ce > cap) ce = cap;
+    if (cs > ce) cs = ce;
   } else {
-    ce = addDays(new Date(), -3);                    // exports lag ~2 days
+    ce = cap;
     cs = addDays(ce, -(parseInt(preset,10)-1));
   }
   const len = Math.round((ce - cs)/86400000) + 1;
@@ -453,81 +547,136 @@ function buildSQL(r){
   const stv = $('stype').value;
   const stF = stv === 'ALL' ? '' : `AND search_type = '${stv}'`;
   const safeBrand = brandRe.replace(/'/g, '');
+  const urlRe = $('url-filter').value.trim().replace(/'/g, '');
+  // With a URL filter, everything runs off the URL table (the site table has no url column).
+  const SRC = urlRe ? U : T;
+  const POS = urlRe ? 'sum_position' : 'sum_top_position';
+  const urlW = urlRe ? `AND REGEXP_CONTAINS(url, r'${urlRe}')` : '';
+  const uW   = urlRe ? `AND REGEXP_CONTAINS(url, r'${urlRe}')` : '';
   const cur = `data_date BETWEEN '${r.cs}' AND '${r.ce}'`;
   const span = `data_date BETWEEN '${r.ps}' AND '${r.ce}'`;
   const isCur = `data_date >= '${r.cs}'`;
-  return {
+  const wk7 = `data_date >= DATE_SUB(DATE '${r.ce}', INTERVAL 6 DAY)`;
+  const wk14 = `data_date BETWEEN DATE_SUB(DATE '${r.ce}', INTERVAL 13 DAY) AND '${r.ce}'`;
+  const sql = {
     trend: `SELECT CAST(data_date AS STRING) d, SUM(clicks) c, SUM(impressions) i,
-              SAFE_DIVIDE(SUM(sum_top_position), SUM(impressions)) + 1 p
-            FROM ${T} WHERE ${span} ${stF} GROUP BY 1 ORDER BY 1`,
+              SAFE_DIVIDE(SUM(${POS}), SUM(impressions)) + 1 p
+            FROM ${SRC} WHERE ${span} ${stF} ${urlW} GROUP BY 1 ORDER BY 1`,
     brand: `SELECT CAST(data_date AS STRING) d,
               CASE WHEN query IS NULL THEN 'anon'
                    WHEN REGEXP_CONTAINS(LOWER(query), r'${safeBrand}') THEN 'brand'
                    ELSE 'nonbrand' END s,
-              SUM(clicks) c FROM ${T} WHERE ${cur} ${stF} GROUP BY 1,2 ORDER BY 1`,
+              SUM(clicks) c FROM ${SRC} WHERE ${cur} ${stF} ${urlW} GROUP BY 1,2 ORDER BY 1`,
     queries: `SELECT query k,
-              SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, sum_top_position, 0)) cp,
-              SUM(IF(${isCur}, 0, clicks)) pc, SUM(IF(${isCur}, 0, impressions)) pi_, SUM(IF(${isCur}, 0, sum_top_position)) pp
-              FROM ${T} WHERE ${span} AND query IS NOT NULL ${stF}
+              SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, ${POS}, 0)) cp,
+              SUM(IF(${isCur}, 0, clicks)) pc, SUM(IF(${isCur}, 0, impressions)) pi_, SUM(IF(${isCur}, 0, ${POS})) pp
+              FROM ${SRC} WHERE ${span} AND query IS NOT NULL ${stF} ${urlW}
               GROUP BY 1 ORDER BY cc DESC, ci DESC LIMIT 2000`,
     pages: `SELECT url k,
               SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, sum_position, 0)) cp,
               SUM(IF(${isCur}, 0, clicks)) pc, SUM(IF(${isCur}, 0, impressions)) pi_, SUM(IF(${isCur}, 0, sum_position)) pp
-              FROM ${U} WHERE ${span} ${stF}
+              FROM ${U} WHERE ${span} ${stF} ${uW}
               GROUP BY 1 ORDER BY cc DESC, ci DESC LIMIT 2000`,
     device: `SELECT device k,
-              SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, sum_top_position, 0)) cp,
+              SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, ${POS}, 0)) cp,
               SUM(IF(${isCur}, 0, clicks)) pc, SUM(IF(${isCur}, 0, impressions)) pi_
-              FROM ${T} WHERE ${span} ${stF} GROUP BY 1 ORDER BY cc DESC`,
+              FROM ${SRC} WHERE ${span} ${stF} ${urlW} GROUP BY 1 ORDER BY cc DESC`,
     country: `SELECT country k,
-              SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, sum_top_position, 0)) cp,
+              SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, ${POS}, 0)) cp,
               SUM(IF(${isCur}, 0, clicks)) pc
-              FROM ${T} WHERE ${span} ${stF} GROUP BY 1 ORDER BY cc DESC LIMIT 12`,
+              FROM ${SRC} WHERE ${span} ${stF} ${urlW} GROUP BY 1 ORDER BY cc DESC LIMIT 12`,
     stype: `SELECT search_type k, SUM(clicks) cc, SUM(impressions) ci,
-              SAFE_DIVIDE(SUM(sum_top_position), SUM(impressions)) + 1 p
-              FROM ${T} WHERE ${cur} GROUP BY 1 ORDER BY cc DESC`,
+              SAFE_DIVIDE(SUM(${POS}), SUM(impressions)) + 1 p
+              FROM ${SRC} WHERE ${cur} ${urlW} GROUP BY 1 ORDER BY cc DESC`,
     posdist: `SELECT CAST(DATE_TRUNC(data_date, WEEK(MONDAY)) AS STRING) wk,
-              CASE WHEN SAFE_DIVIDE(sum_top_position, impressions) + 1 <= 3 THEN '1-3'
-                   WHEN SAFE_DIVIDE(sum_top_position, impressions) + 1 <= 10 THEN '4-10'
-                   WHEN SAFE_DIVIDE(sum_top_position, impressions) + 1 <= 20 THEN '11-20'
+              CASE WHEN SAFE_DIVIDE(${POS}, impressions) + 1 <= 3 THEN '1-3'
+                   WHEN SAFE_DIVIDE(${POS}, impressions) + 1 <= 10 THEN '4-10'
+                   WHEN SAFE_DIVIDE(${POS}, impressions) + 1 <= 20 THEN '11-20'
                    ELSE '21+' END b,
               SUM(impressions) i
-              FROM ${T} WHERE data_date BETWEEN DATE_SUB(DATE '${r.ce}', INTERVAL 83 DAY) AND '${r.ce}' ${stF}
+              FROM ${SRC} WHERE data_date BETWEEN DATE_SUB(DATE '${r.ce}', INTERVAL 83 DAY) AND '${r.ce}' ${stF} ${urlW}
               GROUP BY 1,2 ORDER BY 1`,
     striking: `SELECT query k, SUM(clicks) c, SUM(impressions) i,
-              SAFE_DIVIDE(SUM(sum_top_position), SUM(impressions)) + 1 p
-              FROM ${T} WHERE ${cur} AND query IS NOT NULL ${stF}
+              SAFE_DIVIDE(SUM(${POS}), SUM(impressions)) + 1 p
+              FROM ${SRC} WHERE ${cur} AND query IS NOT NULL ${stF} ${urlW}
               GROUP BY 1 HAVING p >= 4 AND p <= 15 AND i >= 100 ORDER BY i DESC LIMIT 150`,
     cannibal: `WITH qu AS (
                 SELECT query, url, SUM(clicks) c, SUM(impressions) i,
                   SAFE_DIVIDE(SUM(sum_position), SUM(impressions)) + 1 p
-                FROM ${U} WHERE ${cur} AND query IS NOT NULL ${stF} GROUP BY 1,2),
+                FROM ${U} WHERE ${cur} AND query IS NOT NULL ${stF} ${uW} GROUP BY 1,2),
               qt AS (SELECT query, SUM(i) ti, COUNT(*) n FROM qu GROUP BY 1)
               SELECT qu.query q, qu.url u, qu.c, qu.i, qu.p, qt.ti
               FROM qu JOIN qt USING(query)
               WHERE qt.n >= 2 AND qt.ti >= 200 AND qu.i >= 0.15 * qt.ti
               QUALIFY COUNT(*) OVER (PARTITION BY qu.query) >= 2
               ORDER BY qt.ti DESC, qu.i DESC LIMIT 300`,
-    meta: `SELECT (SELECT CAST(MAX(data_date) AS STRING) FROM ${T}) mx,
+    anomQ: `SELECT query k, SUM(IF(${wk7}, clicks, 0)) c7, SUM(IF(${wk7}, 0, clicks)) p7
+              FROM ${SRC} WHERE ${wk14} AND query IS NOT NULL ${stF} ${urlW}
+              GROUP BY 1 HAVING p7 >= 20 AND c7 <= p7 * 0.7 ORDER BY (p7 - c7) DESC LIMIT 20`,
+    anomP: `SELECT url k, SUM(IF(${wk7}, clicks, 0)) c7, SUM(IF(${wk7}, 0, clicks)) p7
+              FROM ${U} WHERE ${wk14} ${stF} ${uW}
+              GROUP BY 1 HAVING p7 >= 20 AND c7 <= p7 * 0.7 ORDER BY (p7 - c7) DESC LIMIT 20`,
+    rich: `SELECT SUM(impressions) ti, SUM(clicks) tc,
+              SUM(IF(is_merchant_listings, impressions, 0)) i_ml, SUM(IF(is_merchant_listings, clicks, 0)) c_ml,
+              SUM(IF(is_product_snippets, impressions, 0)) i_ps, SUM(IF(is_product_snippets, clicks, 0)) c_ps,
+              SUM(IF(is_review_snippet, impressions, 0)) i_rs, SUM(IF(is_review_snippet, clicks, 0)) c_rs,
+              SUM(IF(is_video, impressions, 0)) i_v, SUM(IF(is_video, clicks, 0)) c_v,
+              SUM(IF(is_tpf_faq, impressions, 0)) i_faq, SUM(IF(is_tpf_faq, clicks, 0)) c_faq
+              FROM ${RAW_U} WHERE ${cur} ${stF} ${uW}`,
+    meta: `SELECT (SELECT CAST(MAX(data_date) AS STRING) FROM ${SRC}) mx,
               SAFE_DIVIDE(SUM(IF(is_anonymized_query, impressions, 0)), SUM(impressions)) a
-              FROM ${T} WHERE ${cur} ${stF}`
+              FROM ${SRC} WHERE ${cur} ${stF} ${urlW}`
   };
+  sql.__ctx = {stF, urlW, POS, SRC, urlRe};
+  return sql;
 }
-
 /* ═══════════════ LOAD ═══════════════ */
 async function loadAll(){
   if (!saKey){ openModal(); showBanner('Paste your BigQuery service account key to connect — click <strong>⚙ Connection</strong> in the header.', true); return; }
   hideBanner();
-  const r = getRanges();
-  if (!r.cs || !r.ce || r.cs > r.ce){ setStatus('Check the custom date range', true); return; }
-  const sql = buildSQL(r);
-  const keys = Object.keys(sql);
-  let done = 0;
   $('run-btn').disabled = true;
-  setStatus(`Querying BigQuery… 0/${keys.length}`);
   try {
-    const results = await Promise.all(keys.map(k => runQuery(sql[k]).then(rows => { setStatus(`Querying BigQuery… ${++done}/${keys.length}`); return [k, rows]; })));
-    D = Object.fromEntries(results);
+    // 1. Prefer the backfill union views if they exist, else raw export tables
+    setStatus('Checking data coverage…');
+    const boundsSQL = src => `SELECT CAST(MIN(data_date) AS STRING) mn, CAST(MAX(data_date) AS STRING) mx FROM ${src}`;
+    let bounds;
+    try {
+      T = VIEW_T; U = VIEW_U;
+      bounds = (await runQuery(boundsSQL(T)))[0] || {};
+      usingBackfill = true;
+    } catch(e){
+      if (/not found/i.test(e.message)){
+        T = RAW_T; U = RAW_U; usingBackfill = false;
+        bounds = (await runQuery(boundsSQL(T)))[0] || {};
+      } else throw e;
+    }
+    $('ft-ds').textContent = PROJECT + '.' + DATASET + (usingBackfill ? ' + API backfill' : '');
+    if (!bounds.mx){
+      setStatus('No data yet', true);
+      showBanner('<strong>The export is connected but the tables are empty.</strong> Google Search Console\u2019s bulk export starts collecting from the day it was enabled — there\u2019s no historical backfill. The first daily drop usually lands within 48 hours of setup; check back tomorrow.', true);
+      $('run-btn').disabled = false; return;
+    }
+    // 2. Anchor the range to the newest available day
+    const r = getRanges(bounds.mx);
+    if (!r.cs || !r.ce || r.cs > r.ce){ setStatus('Check the custom date range', true); $('run-btn').disabled = false; return; }
+    const coveredDays = Math.round((new Date(bounds.mx) - new Date(bounds.mn))/86400000) + 1;
+    if (bounds.mn > r.cs){
+      showBanner(`<strong>Limited history so far:</strong> the Search Console export only began on <strong>${bounds.mn}</strong> (${coveredDays} day${coveredDays===1?'':'s'} of data — Google doesn\u2019t backfill). The dashboard is showing what exists; trends and previous-period comparisons will fill out day by day. Tip: use a shorter date range for now.`);
+    } else if (bounds.mn > r.ps){
+      showBanner(`<strong>Heads up:</strong> the previous-period comparison (${r.ps} → ${r.pe}) is only partially covered — the export began on ${bounds.mn}, so deltas will overstate growth until a full comparison window exists.`);
+    }
+    // 3. Run the batch
+    const sql = buildSQL(r);
+    D = {}; D.ctx = sql.__ctx; delete sql.__ctx;
+    const keys = Object.keys(sql);
+    let done = 0;
+    setStatus(`Querying BigQuery… 0/${keys.length}`);
+    const results = await Promise.all(keys.map(k => {
+      let p = runQuery(sql[k]);
+      if (k === 'rich') p = p.catch(e => ({__err: e.message}));   // appearance flags vary by export version
+      return p.then(rows => { setStatus(`Querying BigQuery… ${++done}/${keys.length}`); return [k, rows]; });
+    }));
+    Object.assign(D, Object.fromEntries(results));
     D.ranges = r;
     renderAll();
     setStatus(`Loaded ${r.cs} → ${r.ce}` + ($('cmp-chk').checked ? ` vs ${r.ps} → ${r.pe}` : ''));
@@ -569,6 +718,8 @@ function renderAll(){
   renderDevices(cmp);
   renderCountries(cmp);
   renderSTypes();
+  renderAnomalies();
+  renderRich();
   renderMeta();
 }
 
@@ -685,18 +836,29 @@ function renderPosDist(){
 /* Movers */
 function renderMovers(el, rows, label, isQuery){
   const eligible = rows.filter(x => x.cc + x.pc >= 10);
-  const win = [...eligible].sort((a,b)=>b.dc-a.dc).slice(0,8).filter(x=>x.dc>0);
-  const lose = [...eligible].sort((a,b)=>a.dc-b.dc).slice(0,8).filter(x=>x.dc<0);
+  const win = [...eligible].sort((a,b)=>b.dc-a.dc).slice(0,15).filter(x=>x.dc>0);
+  const lose = [...eligible].sort((a,b)=>a.dc-b.dc).slice(0,15).filter(x=>x.dc<0);
+  const dpos = x => (x.cpos!=null && x.ppos!=null)
+    ? `<span class="chg ${x.cpos<x.ppos?'up':x.cpos>x.ppos?'dn':'fl'}">${(x.ppos-x.cpos)>0?'▲ ':((x.ppos-x.cpos)<0?'▼ ':'')}${Math.abs(x.ppos-x.cpos).toFixed(1)}</span>`
+    : '<span class="chg fl">new</span>';
   const row = x => `<tr><td class="txt">${cell(x.k, isQuery)}</td><td>${fmtF(x.cc)}</td><td class="mut">${fmtF(x.pc)}</td>
-    <td><span class="chg ${x.dc>0?'up':'dn'}">${x.dc>0?'▲ +':'▼ '}${fmtF(x.dc)}</span></td><td>${posBadge(x.cpos)}</td></tr>`;
-  $(el).innerHTML = `<table><thead><tr><th class="txt">${label}</th><th>Clicks</th><th>Prev</th><th>Δ</th><th>Pos</th></tr></thead>
-    <tbody>${win.map(row).join('')}${lose.map(row).join('')}</tbody></table>` + (!win.length && !lose.length ? '<div class="empty">No movement above the threshold</div>' : '');
+    <td><span class="chg ${x.dc>0?'up':'dn'}">${x.dc>0?'▲ +':'▼ '}${fmtF(x.dc)}</span></td><td>${posBadge(x.cpos)}</td><td>${dpos(x)}</td></tr>`;
+  const secLbl = t => `<tr><td colspan="6" style="background:#f4f5f8;padding:5px 10px;text-align:left;font-size:10.5px;font-weight:600;letter-spacing:.6px;color:var(--mut);text-transform:uppercase">${t}</td></tr>`;
+  const grow = win.length ? secLbl('Growing') : '';
+  const divider = lose.length ? secLbl('Declining') : '';
+  $(el).innerHTML = `<table><thead><tr><th class="txt">${label}</th><th>Clicks</th><th>Prev</th><th>Δ clicks</th><th>Pos</th><th>Δ pos</th></tr></thead>
+    <tbody>${grow}${win.map(row).join('')}${divider}${lose.map(row).join('')}</tbody></table>` + (!win.length && !lose.length ? '<div class="empty">No movement above the threshold</div>' : '');
 }
 function cell(k, isQuery){
-  if (isQuery) return `<a class="qlink" href="${gscQ(k)}" target="_blank" rel="noopener" title="Check the live SERP">${esc(k)}</a>`;
+  const attr = esc(k);
+  if (isQuery) return `<span class="qdrill" data-kind="q" data-k="${attr}">${esc(k)}</span><a class="ext" href="${gscQ(k)}" target="_blank" rel="noopener" title="Check the live SERP">↗</a>`;
   const short = k.replace(/^https?:\/\/(www\.)?barkerandstonehouse\.co\.uk/,'') || '/';
-  return `<a class="qlink" href="${esc(k)}" target="_blank" rel="noopener" title="${esc(k)}">${esc(short)}</a>`;
+  return `<span class="qdrill" data-kind="u" data-k="${attr}" title="${attr}">${esc(short)}</span><a class="ext" href="${attr}" target="_blank" rel="noopener" title="Open page">↗</a>`;
 }
+document.addEventListener('click', e => {
+  const el = e.target.closest('.qdrill');
+  if (el) openDrill(el.dataset.kind, el.dataset.k);
+});
 
 /* Sortable query / page tables */
 function bigTable(el, rows, state, isQuery){
@@ -852,11 +1014,186 @@ $('key-save').addEventListener('click', () => {
   if (saKey) loadAll();
 });
 
+/* ═══════════════ DRILL-DOWN DRAWER ═══════════════ */
+async function openDrill(kind, key){
+  if (!D.ranges){ return; }
+  const r = D.ranges, ctx = D.ctx || {stF:'', urlW:'', POS:'sum_top_position'};
+  $('dr-type').textContent = kind === 'q' ? 'Query' : 'Page';
+  $('dr-title').textContent = kind === 'u' ? (key.replace(/^https?:\/\/(www\.)?barkerandstonehouse\.co\.uk/,'') || '/') : key;
+  $('dr-links').innerHTML = kind === 'q'
+    ? `<a href="${gscQ(key)}" target="_blank" rel="noopener">Check the live SERP ↗</a>`
+    : `<a href="${esc(key)}" target="_blank" rel="noopener">Open the page ↗</a>`;
+  $('dr-table').innerHTML = '<div class="dr-loading">Querying…</div>';
+  if (charts['ch-drill']) { charts['ch-drill'].destroy(); delete charts['ch-drill']; }
+  $('drawer-bg').classList.add('show'); $('drawer').classList.add('show');
+  const kEsc = key.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+  const field = kind === 'q' ? 'query' : 'url';
+  const src = kind === 'q' ? T : U;
+  const pos = kind === 'q' ? ctx.POS : 'sum_position';
+  try {
+    const [trend, brk] = await Promise.all([
+      runQuery(`SELECT CAST(data_date AS STRING) d, SUM(clicks) c, SUM(impressions) i,
+        SAFE_DIVIDE(SUM(${pos}), SUM(impressions)) + 1 p
+        FROM ${src} WHERE data_date BETWEEN '${r.ps}' AND '${r.ce}' AND ${field} = '${kEsc}' ${ctx.stF}
+        GROUP BY 1 ORDER BY 1`),
+      runQuery(kind === 'q'
+        ? `SELECT url k, SUM(clicks) c, SUM(impressions) i, SAFE_DIVIDE(SUM(sum_position), SUM(impressions)) + 1 p
+           FROM ${U} WHERE data_date BETWEEN '${r.cs}' AND '${r.ce}' AND query = '${kEsc}' ${ctx.stF}
+           GROUP BY 1 ORDER BY c DESC, i DESC LIMIT 25`
+        : `SELECT query k, SUM(clicks) c, SUM(impressions) i, SAFE_DIVIDE(SUM(sum_position), SUM(impressions)) + 1 p
+           FROM ${U} WHERE data_date BETWEEN '${r.cs}' AND '${r.ce}' AND url = '${kEsc}' AND query IS NOT NULL ${ctx.stF}
+           GROUP BY 1 ORDER BY c DESC, i DESC LIMIT 25`)
+    ]);
+    mkChart('ch-drill', {type:'line', data:{labels:trend.map(x=>x.d.slice(5)), datasets:[
+      {label:'Clicks', data:trend.map(x=>x.c), borderColor:C.clicks, backgroundColor:C.clicks+'22', borderWidth:2, pointRadius:0, tension:.3, yAxisID:'y'},
+      {label:'Impressions', data:trend.map(x=>x.i), borderColor:C.impr, borderWidth:2, pointRadius:0, tension:.3, yAxisID:'y2'}
+    ]}, options:{responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false},
+      plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}}},
+      scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:9, color:'#8a90a0', font:{size:10}}},
+              y:{beginAtZero:true, ticks:{color:C.clicks, font:{size:10}, callback:v=>fmt(v)}, grid:{color:'#eef0f5'}},
+              y2:{position:'right', beginAtZero:true, ticks:{color:C.impr, font:{size:10}, callback:v=>fmt(v)}, grid:{display:false}}}}});
+    const isQ = kind === 'q';
+    $('dr-table').innerHTML = brk.length ? `<table><thead><tr><th class="txt">${isQ ? 'Ranking URL' : 'Query'}</th><th>Clicks</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead><tbody>` +
+      brk.map(x => `<tr><td class="txt">${cell(x.k, !isQ)}</td><td>${fmtF(x.c)}</td><td>${fmtF(x.i)}</td><td>${pct(x.i ? x.c/x.i : null)}</td><td>${posBadge(x.p)}</td></tr>`).join('') +
+      '</tbody></table>' : '<div class="empty">No URL-level rows for this in the current period</div>';
+  } catch(e){
+    $('dr-table').innerHTML = `<div class="empty">Drill query failed: ${esc(e.message)}</div>`;
+  }
+}
+function closeDrill(){ $('drawer-bg').classList.remove('show'); $('drawer').classList.remove('show'); }
+$('dr-close').addEventListener('click', closeDrill);
+$('drawer-bg').addEventListener('click', closeDrill);
+
+/* ═══════════════ ANOMALIES ═══════════════ */
+function renderAnomalies(){
+  const t = (rows, label, isQuery) => rows.length ? `<table><thead><tr><th class="txt">${label}</th><th>Last 7d</th><th>Prior 7d</th><th>Drop</th></tr></thead><tbody>` +
+    rows.map(x => `<tr><td class="txt">${cell(x.k, isQuery)}</td><td>${fmtF(x.c7)}</td><td class="mut">${fmtF(x.p7)}</td>
+      <td><span class="chg dn">▼ ${x.p7 ? Math.round((1 - x.c7/x.p7)*100) : 0}%</span></td></tr>`).join('') + '</tbody></table>'
+    : `<div class="empty">No ${label.toLowerCase()} drops flagged — all steady</div>`;
+  $('tbl-anom-q').innerHTML = t(D.anomQ || [], 'Query', true);
+  $('tbl-anom-p').innerHTML = t(D.anomP || [], 'Page', false);
+}
+
+/* ═══════════════ RICH RESULTS ═══════════════ */
+function renderRich(){
+  const el = $('tbl-rich');
+  const m = D.rich && D.rich.__err === undefined ? D.rich[0] : null;
+  if (!m){ el.innerHTML = `<div class="empty">${D.rich && D.rich.__err ? 'Not available: ' + esc(D.rich.__err) : 'No data'}</div>`; return; }
+  const feats = [
+    ['Merchant listings', m.i_ml, m.c_ml], ['Product snippets', m.i_ps, m.c_ps],
+    ['Review snippets', m.i_rs, m.c_rs], ['Video results', m.i_v, m.c_v], ['FAQ rich results', m.i_faq, m.c_faq]
+  ];
+  el.innerHTML = `<table><thead><tr><th class="txt">Search appearance</th><th>Impressions</th><th>Share of all impr</th><th>Clicks</th><th>CTR</th></tr></thead><tbody>` +
+    feats.map(([n, i, c]) => `<tr><td class="txt">${n}</td><td>${fmtF(i)}</td><td>${pct(m.ti ? i/m.ti : null)}</td><td>${fmtF(c)}</td><td>${pct(i ? c/i : null)}</td></tr>`).join('') +
+    `<tr><td class="txt"><strong>All results</strong></td><td><strong>${fmtF(m.ti)}</strong></td><td>100%</td><td><strong>${fmtF(m.tc)}</strong></td><td>${pct(m.ti ? m.tc/m.ti : null)}</td></tr></tbody></table>`;
+}
+
+/* ═══════════════ SAVED VIEWS ═══════════════ */
+function getViews(){ try { return JSON.parse(localStorage.getItem(LS_VIEWS) || '[]'); } catch(e){ return []; } }
+function renderViews(sel){
+  const v = getViews();
+  $('views-sel').innerHTML = '<option value="">All traffic</option>' + v.map(x => `<option value="${esc(x.re)}" ${x.re===sel?'selected':''}>${esc(x.name)}</option>`).join('');
+}
+$('views-sel').addEventListener('change', () => { $('url-filter').value = $('views-sel').value; loadAll(); });
+$('view-save').addEventListener('click', () => {
+  const re = $('url-filter').value.trim();
+  if (!re){ alert('Type a URL regex first, then save it as a view.'); return; }
+  const name = prompt('Name this view (e.g. Ercol, Dining chairs, Blog):');
+  if (!name) return;
+  const v = getViews().filter(x => x.name !== name);
+  v.push({name, re});
+  localStorage.setItem(LS_VIEWS, JSON.stringify(v));
+  renderViews(re);
+});
+$('view-del').addEventListener('click', () => {
+  const cur = $('views-sel').value;
+  if (!cur){ return; }
+  const name = $('views-sel').options[$('views-sel').selectedIndex].text;
+  if (!confirm(`Delete the "${name}" view?`)) return;
+  localStorage.setItem(LS_VIEWS, JSON.stringify(getViews().filter(x => x.re !== cur)));
+  $('url-filter').value = '';
+  renderViews('');
+});
+
+/* ═══════════════ ASK AI ═══════════════ */
+let aiHistory = [];
+function aiContext(){
+  if (!D.ranges) return null;
+  const {cur, prev} = trendSplit();
+  const agg = rows => ({clicks: rows.reduce((a,x)=>a+x.c,0), impressions: rows.reduce((a,x)=>a+x.i,0)});
+  const slim = (rows, n) => rows.slice(0, n).map(x => ({k:x.k, clicks:x.cc, prev_clicks:x.pc, impr:x.ci, pos:x.cpos!=null?+x.cpos.toFixed(1):null, prev_pos:x.ppos!=null?+x.ppos.toFixed(1):null}));
+  const brandC = D.brand.filter(x=>x.s==='brand').reduce((a,x)=>a+x.c,0), totC = D.brand.reduce((a,x)=>a+x.c,0);
+  return {
+    site: 'barkerandstonehouse.co.uk (premium furniture retailer, UK)',
+    period: {current: [D.ranges.cs, D.ranges.ce], previous: [D.ranges.ps, D.ranges.pe]},
+    filters: {search_type: $('stype').value, url_regex: D.ctx.urlRe || null, brand_regex: brandRe},
+    totals: {current: agg(cur), previous: agg(prev)},
+    brand_click_share: totC ? +(brandC/totC).toFixed(3) : null,
+    top_queries: slim([...D.q].sort((a,b)=>b.cc-a.cc), 25),
+    top_pages: slim([...D.p].sort((a,b)=>b.cc-a.cc), 15),
+    biggest_gainers: slim([...D.q].sort((a,b)=>b.dc-a.dc), 10),
+    biggest_decliners: slim([...D.q].sort((a,b)=>a.dc-b.dc), 10),
+    striking_distance: (D.striking||[]).slice(0,10).map(x=>({query:x.k, pos:+x.p.toFixed(1), impressions:x.i, clicks:x.c})),
+    wow_drops_queries: (D.anomQ||[]).map(x=>({query:x.k, last7:x.c7, prior7:x.p7})),
+    devices: (D.device||[]).map(x=>({device:x.k, clicks:x.cc, prev_clicks:x.pc})),
+    countries: (D.country||[]).slice(0,5).map(x=>({country:x.k, clicks:x.cc}))
+  };
+}
+async function aiSend(){
+  const q = $('ai-q').value.trim();
+  if (!q) return;
+  if (!D.ranges){ addMsg('bot', 'Load some data first (hit Run), then ask away.'); return; }
+  let key = localStorage.getItem(LS_AI);
+  if (!key){
+    key = prompt('Paste your Anthropic API key (stored in this browser only):');
+    if (!key) return;
+    localStorage.setItem(LS_AI, key.trim()); key = key.trim();
+  }
+  addMsg('user', q); $('ai-q').value = ''; $('ai-send').disabled = true;
+  const think = addMsg('think', 'Thinking…');
+  aiHistory.push({role:'user', content:q});
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json', 'x-api-key':key, 'anthropic-version':'2023-06-01', 'anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({model:'claude-sonnet-4-6', max_tokens:1200,
+        system: 'You are an SEO analyst for Barker & Stonehouse, a UK premium furniture retailer. Answer questions using ONLY the Search Console data provided below (from the GSC BigQuery export). Be specific — cite actual queries, pages and numbers. Use UK English. Keep answers tight and actionable; plain prose, no markdown headers. If the data cannot answer the question, say so.\n\nDATA:\n' + JSON.stringify(aiContext()),
+        messages: aiHistory.slice(-10)})
+    });
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message || 'API error');
+    const txt = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n').trim() || 'No response';
+    aiHistory.push({role:'assistant', content:txt});
+    think.remove(); addMsg('bot', txt);
+  } catch(e){
+    think.remove(); addMsg('bot', 'Error: ' + e.message + (/(401|auth|key)/i.test(e.message) ? ' — reset the key via the "API key" button.' : ''));
+    aiHistory.pop();
+  }
+  $('ai-send').disabled = false;
+}
+function addMsg(cls, txt){
+  const d = document.createElement('div');
+  d.className = 'ai-msg ' + cls; d.textContent = txt;
+  $('ai-msgs').appendChild(d); $('ai-msgs').scrollTop = $('ai-msgs').scrollHeight;
+  return d;
+}
+$('ai-fab').addEventListener('click', () => { $('ai-panel').classList.add('show'); $('ai-fab').style.display='none'; $('ai-q').focus(); });
+$('ai-close').addEventListener('click', () => { $('ai-panel').classList.remove('show'); $('ai-fab').style.display=''; });
+$('ai-key').addEventListener('click', () => {
+  const k = prompt('Anthropic API key (blank to clear):', localStorage.getItem(LS_AI) ? '••••••••' : '');
+  if (k === null) return;
+  if (!k.trim() || k.includes('•')) { if (!k.trim()) localStorage.removeItem(LS_AI); return; }
+  localStorage.setItem(LS_AI, k.trim());
+});
+$('ai-send').addEventListener('click', aiSend);
+$('ai-q').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); aiSend(); } });
+
 /* ═══════════════ INIT ═══════════════ */
 (function init(){
   const end = addDays(new Date(), -3);
   $('date-to').value = iso(end);
   $('date-from').value = iso(addDays(end, -27));
+  renderViews('');
   if (saKey) loadAll();
   else showBanner('First run: click <strong>⚙ Connection</strong> (top right) and upload the BigQuery service account key JSON file. It lives in localStorage on this machine only — never in the repo.');
 })();
