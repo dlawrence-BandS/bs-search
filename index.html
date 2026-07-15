@@ -6,14 +6,14 @@
 <meta name="robots" content="noindex,nofollow">
 <title>B&S Organic Search Performance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --navy:#1d3c6e; --navy-d:#152c52; --bg:#f4f5f8; --card:#ffffff; --ink:#1c2333; --mut:#6b7280;
-  --line:#e5e8ef;
-  --m-clicks:#4285f4; --m-impr:#5e35b1; --m-ctr:#00897b; --m-pos:#e8710a;
-  --up:#0d7a3f; --dn:#c62828; --up-bg:#e7f5ec; --dn-bg:#fdebea;
+  --navy:#1f332a; --navy-d:#15241d; --bg:#f4f1ea; --card:#fffdf8; --ink:#27231c; --mut:#8b8272;
+  --line:#e7e0d2; --brass:#a8814f; --brass-d:#8f6c3f;
+  --m-clicks:#a8814f; --m-impr:#3d5747; --m-ctr:#5b7085; --m-pos:#b45f42;
+  --up:#3e7048; --dn:#a13d2d; --up-bg:#eaf0e4; --dn-bg:#f8e9e2;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
@@ -21,26 +21,26 @@ button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:13px}
 
 /* ── Header ─────────────────────────────── */
-header{background:var(--navy);color:#fff;padding:18px 28px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-header h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;letter-spacing:.2px}
-header .sub{font-size:12px;opacity:.75}
+header{background:var(--navy);color:#fff;padding:22px 30px;display:flex;align-items:center;gap:18px;flex-wrap:wrap;border-bottom:3px solid var(--brass)}
+header h1{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;letter-spacing:.4px}
+header .sub{font-size:11px;opacity:.72;text-transform:uppercase;letter-spacing:1.6px;margin-top:2px}
 header .meta{margin-left:auto;display:flex;gap:16px;align-items:center;font-size:12px}
-header .meta .pill{background:rgba(255,255,255,.12);padding:5px 12px;border-radius:20px;white-space:nowrap}
-#key-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600}
-#key-btn:hover{background:rgba(255,255,255,.25)}
+header .meta .pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.14);padding:5px 13px;border-radius:20px;white-space:nowrap;letter-spacing:.3px}
+#key-btn{background:transparent;border:1px solid var(--brass);color:#e8d9c2;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:.3px}
+#key-btn:hover{background:var(--brass);color:#fff}
 
 /* ── Controls ───────────────────────────── */
 .controls{background:#fff;border-bottom:1px solid var(--line);padding:12px 28px;display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;position:sticky;top:0;z-index:40}
 .ctl{display:flex;flex-direction:column;gap:4px}
 .ctl label{font-size:10.5px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.6px}
-.ctl select,.ctl input{border:1px solid #cfd5e1;border-radius:8px;padding:7px 10px;background:#fff;min-width:130px}
+.ctl select,.ctl input{border:1px solid #d4ccbb;border-radius:8px;padding:7px 10px;background:#fff;min-width:130px}
 .ctl input[type=date]{min-width:140px}
 #custom-dates{display:none;gap:14px}
 #custom-dates.show{display:flex}
 .chk{display:flex;align-items:center;gap:7px;padding-bottom:8px;font-size:13px;color:var(--ink)}
 .chk input{min-width:0}
-#run-btn{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:9px 26px;font-weight:600;font-size:13.5px}
-#run-btn:hover{background:var(--navy-d)}
+#run-btn{background:var(--brass);color:#fff;border:none;border-radius:8px;padding:9px 28px;font-weight:600;font-size:13.5px;letter-spacing:.4px}
+#run-btn:hover{background:var(--brass-d)}
 #run-btn:disabled{opacity:.55;cursor:wait}
 #status{font-size:12px;color:var(--mut);padding-bottom:9px;min-width:150px}
 #status.err{color:var(--dn);font-weight:600}
@@ -58,28 +58,28 @@ main{max-width:1360px;margin:0 auto;padding:22px 28px 60px}
 .kpi.off{opacity:.45;border-top-color:#c8cdd8}
 .kpi .kl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;color:var(--mut);display:flex;align-items:center;gap:6px}
 .kpi .kl .dot{width:9px;height:9px;border-radius:50%;background:var(--kc)}
-.kpi .kv{font-size:27px;font-weight:700;margin:6px 0 4px;font-variant-numeric:tabular-nums}
+.kpi .kv{font-size:29px;font-weight:600;margin:6px 0 4px;font-variant-numeric:tabular-nums;letter-spacing:-.3px}
 .kpi .kd{font-size:12px;color:var(--mut)}
 .chg{display:inline-flex;align-items:center;gap:3px;font-weight:600;font-size:12px;padding:2px 8px;border-radius:12px;font-variant-numeric:tabular-nums}
 .chg.up{color:var(--up);background:var(--up-bg)}
 .chg.dn{color:var(--dn);background:var(--dn-bg)}
-.chg.fl{color:var(--mut);background:#eef0f4}
+.chg.fl{color:var(--mut);background:#eeeade}
 
 /* Cards & tabs */
 .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px}
-.card h3{font-size:14.5px;font-weight:700;margin-bottom:2px}
+.card h3{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;margin-bottom:2px;letter-spacing:.2px}
 .card .hint{font-size:12px;color:var(--mut);margin-bottom:12px}
 .card-head{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
 .card-head .tools{margin-left:auto;display:flex;gap:8px;align-items:center}
-.tools input[type=search]{border:1px solid #cfd5e1;border-radius:8px;padding:6px 10px;width:210px}
-.csv-btn{background:#fff;border:1px solid #cfd5e1;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy)}
-.csv-btn:hover{background:#f0f3f9}
+.tools input[type=search]{border:1px solid #d4ccbb;border-radius:8px;padding:6px 10px;width:210px}
+.csv-btn{background:#fff;border:1px solid #d4ccbb;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--navy)}
+.csv-btn:hover{background:#f2ede1}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 @media(max-width:900px){.grid2{grid-template-columns:1fr}}
 
 nav.tabs{display:flex;gap:4px;border-bottom:2px solid var(--line);margin:6px 0 18px;flex-wrap:wrap}
 nav.tabs button{background:none;border:none;padding:10px 18px;font-size:13.5px;font-weight:600;color:var(--mut);border-bottom:3px solid transparent;margin-bottom:-2px}
-nav.tabs button.on{color:var(--navy);border-bottom-color:var(--navy)}
+nav.tabs button.on{color:var(--navy);border-bottom-color:var(--brass)}
 .panel{display:none}
 .panel.on{display:block}
 
@@ -91,11 +91,11 @@ th.txt, td.txt{text-align:left}
 th.sorted{color:var(--navy)}
 td{padding:8px 10px;border-bottom:1px solid #f0f2f6;text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 td.txt{white-space:normal;word-break:break-word;max-width:440px}
-tr:hover td{background:#f8fafd}
+tr:hover td{background:#faf7ef}
 td .qlink{color:var(--ink);text-decoration:none}
 td .qlink:hover{color:var(--m-clicks);text-decoration:underline}
 .posb{display:inline-block;min-width:44px;text-align:center;padding:2px 7px;border-radius:10px;font-weight:600;font-size:12px}
-.posb.p1{background:#e2f0e8;color:#0d7a3f}.posb.p2{background:#fdf3e3;color:#b06000}.posb.p3{background:#fdeae4;color:#c04b1d}.posb.p4{background:#eef0f4;color:#6b7280}
+.posb.p1{background:#e2f0e8;color:#0d7a3f}.posb.p2{background:#fdf3e3;color:#b06000}.posb.p3{background:#fdeae4;color:#c04b1d}.posb.p4{background:#eeeade;color:#6b7280}
 .mut{color:var(--mut)}
 .empty{padding:26px;text-align:center;color:var(--mut);font-size:13px}
 canvas{max-width:100%}
@@ -106,25 +106,25 @@ canvas{max-width:100%}
 .modal-bg{position:fixed;inset:0;background:rgba(15,25,50,.55);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
 .modal-bg.show{display:flex}
 .modal{background:#fff;border-radius:14px;max-width:640px;width:100%;padding:26px 28px}
-.modal h2{font-family:'Playfair Display',serif;font-size:19px;margin-bottom:8px}
+.modal h2{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:600;margin-bottom:8px}
 .modal p{font-size:13px;color:var(--mut);line-height:1.6;margin-bottom:12px}
-.modal textarea{width:100%;height:96px;border:1px solid #cfd5e1;border-radius:10px;padding:12px;font-family:ui-monospace,monospace;font-size:11.5px;resize:vertical}
-.modal input[type=file]{width:100%;border:1px dashed #aab4c8;border-radius:10px;padding:14px 12px;background:#f8fafd;font-size:12.5px;cursor:pointer}
+.modal textarea{width:100%;height:96px;border:1px solid #d4ccbb;border-radius:10px;padding:12px;font-family:ui-monospace,monospace;font-size:11.5px;resize:vertical}
+.modal input[type=file]{width:100%;border:1px dashed #aab4c8;border-radius:10px;padding:14px 12px;background:#faf7ef;font-size:12.5px;cursor:pointer}
 .modal input[type=file]::file-selector-button{background:var(--navy);color:#fff;border:none;border-radius:7px;padding:7px 14px;font-weight:600;font-size:12px;margin-right:12px;cursor:pointer}
 .modal input[type=file].ok{border-color:#0d7a3f;background:#f0f9f3}
 .modal .row{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
 .modal .row .sp{margin-left:auto}
-.btn{border-radius:8px;padding:9px 20px;font-weight:600;font-size:13px;border:1px solid #cfd5e1;background:#fff}
+.btn{border-radius:8px;padding:9px 20px;font-weight:600;font-size:13px;border:1px solid #d4ccbb;background:#fff}
 .btn.prime{background:var(--navy);color:#fff;border-color:var(--navy)}
 .btn.danger{color:var(--dn);border-color:#f0b9b6}
 #key-state{font-size:12px;color:var(--mut)}
 .modal .field{margin-top:14px}
 .modal .field label{display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);margin-bottom:5px}
-.modal .field input{width:100%;border:1px solid #cfd5e1;border-radius:8px;padding:8px 10px}
+.modal .field input{width:100%;border:1px solid #d4ccbb;border-radius:8px;padding:8px 10px}
 
 footer{text-align:center;color:var(--mut);font-size:12px;padding:10px 0 30px}
-.mini-btn{background:#fff;border:1px solid #cfd5e1;border-radius:8px;padding:0 10px;font-size:13px;color:var(--navy)}
-.mini-btn:hover{background:#f0f3f9}
+.mini-btn{background:#fff;border:1px solid #d4ccbb;border-radius:8px;padding:0 10px;font-size:13px;color:var(--navy)}
+.mini-btn:hover{background:#f2ede1}
 .qdrill{cursor:pointer;border-bottom:1px dashed #b9c4d8}
 .qdrill:hover{color:var(--m-clicks);border-bottom-color:var(--m-clicks)}
 a.ext{text-decoration:none;color:#9aa3b5;font-size:11px;margin-left:4px}
@@ -144,7 +144,7 @@ a.ext:hover{color:var(--m-clicks)}
 .dr-loading{padding:30px;text-align:center;color:var(--mut)}
 
 /* Ask AI */
-#ai-fab{position:fixed;bottom:22px;right:22px;z-index:70;background:var(--navy);color:#fff;border:none;border-radius:26px;padding:13px 22px;font-weight:600;font-size:13.5px;box-shadow:0 6px 18px rgba(20,35,70,.3)}
+#ai-fab{position:fixed;bottom:22px;right:22px;z-index:70;background:var(--navy);color:#fff;border:1px solid var(--brass);border-radius:26px;padding:13px 22px;font-weight:600;font-size:13.5px;box-shadow:0 6px 18px rgba(35,30,20,.3)}
 #ai-fab:hover{background:var(--navy-d)}
 #ai-panel{position:fixed;bottom:22px;right:22px;width:420px;max-width:94vw;height:560px;max-height:80vh;background:#fff;border-radius:16px;box-shadow:0 12px 40px rgba(15,25,50,.3);z-index:75;display:none;flex-direction:column;overflow:hidden}
 #ai-panel.show{display:flex}
@@ -155,10 +155,10 @@ a.ext:hover{color:var(--m-clicks)}
 .ai-msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px}
 .ai-msg{max-width:88%;padding:10px 13px;border-radius:13px;font-size:13px;line-height:1.55;white-space:pre-wrap;word-break:break-word}
 .ai-msg.user{align-self:flex-end;background:var(--navy);color:#fff;border-bottom-right-radius:4px}
-.ai-msg.bot{align-self:flex-start;background:#f0f3f9;border-bottom-left-radius:4px}
+.ai-msg.bot{align-self:flex-start;background:#f2ede1;border-bottom-left-radius:4px}
 .ai-msg.think{align-self:flex-start;color:var(--mut);font-style:italic;padding:4px 13px}
 .ai-input{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line)}
-.ai-input textarea{flex:1;border:1px solid #cfd5e1;border-radius:10px;padding:9px 11px;resize:none;font-size:13px}
+.ai-input textarea{flex:1;border:1px solid #d4ccbb;border-radius:10px;padding:9px 11px;resize:none;font-size:13px}
 .ai-input button{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:0 18px;font-weight:600}
 .ai-input button:disabled{opacity:.5}
 </style>
@@ -213,7 +213,14 @@ a.ext:hover{color:var(--m-clicks)}
       <button class="mini-btn" id="view-del" title="Delete the selected view">✕</button>
     </div>
   </div>
-  <label class="chk"><input type="checkbox" id="cmp-chk" checked> Compare vs previous period</label>
+  <div class="ctl">
+    <label>Compare</label>
+    <select id="cmp-sel">
+      <option value="prev" selected>vs previous period</option>
+      <option value="yoy">vs same period last year</option>
+      <option value="off">No comparison</option>
+    </select>
+  </div>
   <button id="run-btn">Run</button>
   <div id="status"></div>
 </div>
@@ -328,11 +335,21 @@ a.ext:hover{color:var(--m-clicks)}
 
   <!-- ── SEGMENTS ── -->
   <section class="panel" id="panel-segments">
+    <div class="card">
+      <div class="card-head">
+        <div><h3>Site sections</h3><div class="hint">Clicks by top-level URL path &mdash; how each area of the site earns its search traffic</div></div>
+        <div class="tools"><button class="csv-btn" id="sec-csv">Export CSV</button></div>
+      </div>
+      <div class="tbl-wrap" id="tbl-sections"></div>
+    </div>
     <div class="grid2">
       <div class="card"><h3>Devices</h3><div class="hint">Current period vs previous</div><div class="tbl-wrap" id="tbl-device"></div><div class="chart-s" style="height:230px;margin-top:14px"><canvas id="ch-device"></canvas></div></div>
-      <div class="card"><h3>Countries</h3><div class="hint">Top countries by clicks</div><div class="tbl-wrap" id="tbl-country"></div></div>
+      <div class="card"><h3>Weekday pattern</h3><div class="hint">Average daily clicks by day of week, current vs comparison period</div><div class="chart-s" style="height:230px;margin-top:14px"><canvas id="ch-weekday"></canvas></div></div>
     </div>
-    <div class="card"><h3>Search types</h3><div class="hint">Current period, all search types regardless of the filter above</div><div class="tbl-wrap" id="tbl-stype"></div></div>
+    <div class="grid2">
+      <div class="card"><h3>Countries</h3><div class="hint">Top countries by clicks</div><div class="tbl-wrap" id="tbl-country"></div></div>
+      <div class="card"><h3>Search types</h3><div class="hint">Current period, all search types regardless of the filter above</div><div class="tbl-wrap" id="tbl-stype"></div></div>
+    </div>
     <div class="card"><h3>Rich result coverage</h3><div class="hint">Share of impressions carrying each search appearance, current period &middot; export data only (appearance flags aren't in the backfill)</div><div class="tbl-wrap" id="tbl-rich"></div></div>
   </section>
 
@@ -545,6 +562,8 @@ async function runQuery(sql){
 }
 
 /* ═══════════════ DATE RANGES ═══════════════ */
+function cmpMode(){ return $('cmp-sel').value; }
+function cmpOn(){ return cmpMode() !== 'off'; }
 function getRanges(mx){
   const preset = $('preset').value;
   const cap = mx ? new Date(mx + 'T00:00:00Z') : addDays(new Date(), -3);
@@ -559,7 +578,13 @@ function getRanges(mx){
     cs = addDays(ce, -(parseInt(preset,10)-1));
   }
   const len = Math.round((ce - cs)/86400000) + 1;
-  const pe = addDays(cs, -1), ps = addDays(pe, -(len-1));
+  let ps, pe;
+  if (cmpMode() === 'yoy'){
+    // 364-day shift = 52 weeks exactly, so weekdays align with last year
+    ps = addDays(cs, -364); pe = addDays(ce, -364);
+  } else {
+    pe = addDays(cs, -1); ps = addDays(pe, -(len-1));
+  }
   return {cs:iso(cs), ce:iso(ce), ps:iso(ps), pe:iso(pe), len};
 }
 
@@ -575,7 +600,7 @@ function buildSQL(r){
   const urlW = urlRe ? `AND REGEXP_CONTAINS(url, r'${urlRe}')` : '';
   const uW   = urlRe ? `AND REGEXP_CONTAINS(url, r'${urlRe}')` : '';
   const cur = `data_date BETWEEN '${r.cs}' AND '${r.ce}'`;
-  const span = `data_date BETWEEN '${r.ps}' AND '${r.ce}'`;
+  const span = `((data_date BETWEEN '${r.ps}' AND '${r.pe}') OR (data_date BETWEEN '${r.cs}' AND '${r.ce}'))`;
   const isCur = `data_date >= '${r.cs}'`;
   const wk7 = `data_date >= DATE_SUB(DATE '${r.ce}', INTERVAL 6 DAY)`;
   const wk14 = `data_date BETWEEN DATE_SUB(DATE '${r.ce}', INTERVAL 13 DAY) AND '${r.ce}'`;
@@ -609,6 +634,11 @@ function buildSQL(r){
     stype: `SELECT search_type k, SUM(clicks) cc, SUM(impressions) ci,
               SAFE_DIVIDE(SUM(${POS}), SUM(impressions)) + 1 p
               FROM ${SRC} WHERE ${cur} ${urlW} GROUP BY 1 ORDER BY cc DESC`,
+    sections: `SELECT COALESCE(REGEXP_EXTRACT(url, r'^https?://[^/]+(/[^/?#]+)'), '/') k,
+              SUM(IF(${isCur}, clicks, 0)) cc, SUM(IF(${isCur}, impressions, 0)) ci, SUM(IF(${isCur}, sum_position, 0)) cp,
+              SUM(IF(${isCur}, 0, clicks)) pc, SUM(IF(${isCur}, 0, impressions)) pi_
+              FROM ${U} WHERE ${span} ${stF} ${uW}
+              GROUP BY 1 HAVING cc + pc > 0 ORDER BY cc DESC LIMIT 25`,
     posdist: `SELECT CAST(DATE_TRUNC(data_date, WEEK(MONDAY)) AS STRING) wk,
               CASE WHEN SAFE_DIVIDE(${POS}, impressions) + 1 <= 3 THEN '1-3'
                    WHEN SAFE_DIVIDE(${POS}, impressions) + 1 <= 10 THEN '4-10'
@@ -639,6 +669,7 @@ function buildSQL(r){
               GROUP BY 1 HAVING p7 >= 20 AND c7 <= p7 * 0.7 ORDER BY (p7 - c7) DESC LIMIT 20`,
     rich: `SELECT SUM(impressions) ti, SUM(clicks) tc,
               SUM(IF(is_merchant_listings, impressions, 0)) i_ml, SUM(IF(is_merchant_listings, clicks, 0)) c_ml,
+              SUM(IF(is_organic_shopping, impressions, 0)) i_os, SUM(IF(is_organic_shopping, clicks, 0)) c_os,
               SUM(IF(is_product_snippets, impressions, 0)) i_ps, SUM(IF(is_product_snippets, clicks, 0)) c_ps,
               SUM(IF(is_review_snippet, impressions, 0)) i_rs, SUM(IF(is_review_snippet, clicks, 0)) c_rs,
               SUM(IF(is_video, impressions, 0)) i_v, SUM(IF(is_video, clicks, 0)) c_v,
@@ -653,6 +684,7 @@ function buildSQL(r){
 }
 /* ═══════════════ LOAD ═══════════════ */
 async function loadAll(){
+  if ($('run-btn').disabled) return;   // a load is already in flight
   hideBanner();
   $('run-btn').disabled = true;
   try {
@@ -699,22 +731,22 @@ async function loadAll(){
     Object.assign(D, Object.fromEntries(results));
     D.ranges = r;
     renderAll();
-    setStatus(`Loaded ${r.cs} → ${r.ce}` + ($('cmp-chk').checked ? ` vs ${r.ps} → ${r.pe}` : ''));
+    setStatus(`Loaded ${r.cs} → ${r.ce}` + (cmpOn() ? ` vs ${r.ps} → ${r.pe}` : ''));
   } catch(e){
     console.error(e);
     setStatus('Query failed', true);
-    showBanner('<strong>BigQuery error:</strong> ' + esc(e.message) + '<br>If this mentions permissions, the service account needs <em>BigQuery Data Viewer</em> on the <code>searchconsole</code> dataset plus <em>BigQuery Job User</em> on the project. If it mentions the key or JWT, mint a fresh key and paste it via ⚙ Connection.', true);
+    showBanner('<strong>Error:</strong> ' + esc(e.message) + '<br>If this mentions permissions, your Google account needs <em>BigQuery Data Viewer</em> plus <em>BigQuery Job User</em> on the project (check you picked the right account — ⚙ Connection → Sign out to switch). If sign-in was cancelled or blocked, click Run to try again.', true);
   }
   $('run-btn').disabled = false;
 }
 
 /* ═══════════════ RENDER ═══════════════ */
-const C = {clicks:'#4285f4', impr:'#5e35b1', ctr:'#00897b', pos:'#e8710a'};
+const C = {clicks:'#a8814f', impr:'#3d5747', ctr:'#5b7085', pos:'#b45f42'};
 function mkChart(id, cfg){ if (charts[id]) charts[id].destroy(); charts[id] = new Chart($(id), cfg); return charts[id]; }
 function sumBy(rows, pred, field){ return rows.reduce((a,x) => a + (pred(x) ? (x[field]||0) : 0), 0); }
 
 function renderAll(){
-  const r = D.ranges, cmp = $('cmp-chk').checked;
+  const r = D.ranges, cmp = cmpOn();
   // enrich query/page rows
   const enrich = x => ({...x,
     cctr: x.ci ? x.cc/x.ci : null, cpos: x.ci ? x.cp/x.ci + 1 : null,
@@ -736,6 +768,8 @@ function renderAll(){
   renderLowCTR();
   renderCannibal();
   renderDevices(cmp);
+  renderSections(cmp);
+  renderWeekday();
   renderCountries(cmp);
   renderSTypes();
   renderAnomalies();
@@ -764,10 +798,11 @@ function renderKPIs(cmp){
   };
   const a = agg(cur), b = agg(prev);
   const set = (id, val, sub) => { const el = $(id); el.querySelector('.kv').innerHTML = val; el.querySelector('.kd').innerHTML = sub; };
-  set('kpi-clicks', fmt(a.c),  cmp ? chip(a.c, b.c) + ` <span class="mut">prev ${fmt(b.c)}</span>` : '');
-  set('kpi-impr',   fmt(a.i),  cmp ? chip(a.i, b.i) + ` <span class="mut">prev ${fmt(b.i)}</span>` : '');
-  set('kpi-ctr',    pct(a.ctr), cmp ? chip(a.ctr, b.ctr, {isPct:true}) + ` <span class="mut">prev ${pct(b.ctr)}</span>` : '');
-  set('kpi-pos',    pos1(a.p), cmp ? chip(a.p, b.p, {isPos:true, invert:true}) + ` <span class="mut">prev ${pos1(b.p)}</span>` : '');
+  const pl = cmpMode()==='yoy' ? 'last yr' : 'prev';
+  set('kpi-clicks', fmt(a.c),  cmp ? chip(a.c, b.c) + ` <span class="mut">${pl} ${fmt(b.c)}</span>` : '');
+  set('kpi-impr',   fmt(a.i),  cmp ? chip(a.i, b.i) + ` <span class="mut">${pl} ${fmt(b.i)}</span>` : '');
+  set('kpi-ctr',    pct(a.ctr), cmp ? chip(a.ctr, b.ctr, {isPct:true}) + ` <span class="mut">${pl} ${pct(b.ctr)}</span>` : '');
+  set('kpi-pos',    pos1(a.p), cmp ? chip(a.p, b.p, {isPos:true, invert:true}) + ` <span class="mut">${pl} ${pos1(b.p)}</span>` : '');
 }
 function renderTrend(cmp){
   const {cur, prev} = trendSplit();
@@ -797,8 +832,8 @@ function renderTrend(cmp){
       return l+': '+fmtF(v);
     }}}},
     scales:{
-      x:{grid:{display:false}, ticks:{maxTicksLimit:14, color:'#8a90a0', font:{size:11}}},
-      yC:{position:'left', beginAtZero:true, ticks:{color:C.clicks, font:{size:11}, callback:v=>fmt(v)}, grid:{color:'#eef0f5'}},
+      x:{grid:{display:false}, ticks:{maxTicksLimit:14, color:'#98907d', font:{size:11}}},
+      yC:{position:'left', beginAtZero:true, ticks:{color:C.clicks, font:{size:11}, callback:v=>fmt(v)}, grid:{color:'#ece7da'}},
       yI:{position:'right', beginAtZero:true, ticks:{color:C.impr, font:{size:11}, callback:v=>fmt(v)}, grid:{display:false}},
       yR:{display:false, beginAtZero:true},
       yP:{display:false, reverse:true}
@@ -820,7 +855,7 @@ function applyKpiVisibility(ch, cmp){
 }
 document.querySelectorAll('.kpi').forEach(k => k.addEventListener('click', () => {
   k.classList.toggle('off');
-  if (charts['ch-trend']) applyKpiVisibility(charts['ch-trend'], $('cmp-chk').checked);
+  if (charts['ch-trend']) applyKpiVisibility(charts['ch-trend'], cmpOn());
 }));
 
 /* Brand split */
@@ -832,25 +867,25 @@ function renderBrand(){
   $('brand-hint').textContent = `Brand terms took ${total?((brandC/total)*100).toFixed(1):'–'}% of clicks this period (regex: ${brandRe})`;
   mkChart('ch-brand', {type:'line', data:{labels:days.map(d=>d.slice(5)), datasets:[
     {label:'Non-brand', data:seg('nonbrand'), borderColor:C.clicks, backgroundColor:C.clicks+'33', fill:true, stack:'s', pointRadius:0, borderWidth:1.5, tension:.3},
-    {label:'Brand', data:seg('brand'), borderColor:'#1d3c6e', backgroundColor:'#1d3c6e55', fill:true, stack:'s', pointRadius:0, borderWidth:1.5, tension:.3},
-    {label:'Anonymised', data:seg('anon'), borderColor:'#9aa3b5', backgroundColor:'#9aa3b544', fill:true, stack:'s', pointRadius:0, borderWidth:1.5, tension:.3},
+    {label:'Brand', data:seg('brand'), borderColor:'#1f332a', backgroundColor:'#1f332a55', fill:true, stack:'s', pointRadius:0, borderWidth:1.5, tension:.3},
+    {label:'Anonymised', data:seg('anon'), borderColor:'#b3ab99', backgroundColor:'#b3ab9944', fill:true, stack:'s', pointRadius:0, borderWidth:1.5, tension:.3},
   ]}, options:{responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false},
     plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}}},
-    scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:10, color:'#8a90a0', font:{size:11}}},
-            y:{stacked:true, beginAtZero:true, ticks:{callback:v=>fmt(v), color:'#8a90a0', font:{size:11}}, grid:{color:'#eef0f5'}}}}});
+    scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:10, color:'#98907d', font:{size:11}}},
+            y:{stacked:true, beginAtZero:true, ticks:{callback:v=>fmt(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}}}}});
 }
 
 /* Position distribution */
 function renderPosDist(){
   const wks = [...new Set(D.posdist.map(x=>x.wk))].sort();
   const bands = ['1-3','4-10','11-20','21+'];
-  const cols = {'1-3':'#0d7a3f','4-10':'#7cb342','11-20':'#f9a825','21+':'#c8cdd8'};
+  const cols = {'1-3':'#3d5747','4-10':'#8ba06f','11-20':'#c9a35e','21+':'#ded7c6'};
   mkChart('ch-posdist', {type:'bar', data:{labels:wks.map(w=>w.slice(5)), datasets: bands.map(b => ({
     label:'Pos '+b, data: wks.map(w => sumBy(D.posdist, x=>x.wk===w && x.b===b, 'i')), backgroundColor:cols[b], stack:'s', borderRadius:2}))},
     options:{responsive:true, maintainAspectRatio:false,
       plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}}, tooltip:{callbacks:{label: c => c.dataset.label+': '+fmtF(c.parsed.y)}}},
-      scales:{x:{stacked:true, grid:{display:false}, ticks:{color:'#8a90a0', font:{size:11}}},
-              y:{stacked:true, ticks:{callback:v=>fmt(v), color:'#8a90a0', font:{size:11}}, grid:{color:'#eef0f5'}}}}});
+      scales:{x:{stacked:true, grid:{display:false}, ticks:{color:'#98907d', font:{size:11}}},
+              y:{stacked:true, ticks:{callback:v=>fmt(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}}}}});
 }
 
 /* Movers */
@@ -883,7 +918,7 @@ document.addEventListener('click', e => {
 /* Sortable query / page tables */
 function bigTable(el, rows, state, isQuery){
   const f = state.filter.toLowerCase();
-  let data = f ? rows.filter(x => x.k.toLowerCase().includes(f)) : [...rows];
+  let data = f ? rows.filter(x => String(x.k??'').toLowerCase().includes(f)) : [...rows];
   data.sort((a,b) => {
     const va = a[state.sort], vb = b[state.sort];
     if (va == null && vb == null) return 0;
@@ -950,6 +985,8 @@ function renderLowCTR(){
     lowCtrRows.map(x => `<tr><td class="txt">${cell(x.k,true)}</td><td>${posBadge(x.cpos)}</td><td>${fmtF(x.ci)}</td><td>${pct(x.cctr)}</td><td class="mut">${pct(x.e)}</td><td><span class="chg dn">−${fmtF(x.missed)}</span></td></tr>`).join('') +
     '</tbody></table>' : '<div class="empty">No page-one queries with a meaningful CTR shortfall — nice</div>';
 }
+$('sec-csv').addEventListener('click', () => dlCSV('gsc_sections', ['section','clicks','prev_clicks','impressions','position'],
+  (D.sections||[]).map(x => [x.k, x.cc, x.pc, x.ci, x.ci&&x.cp!=null ? (x.cp/x.ci+1).toFixed(1) : ''])));
 $('ctr-csv').addEventListener('click', () => dlCSV('gsc_low_ctr', ['query','position','impressions','ctr','expected_ctr','missed_clicks'],
   lowCtrRows.map(x => [x.k, x.cpos.toFixed(1), x.ci, ((x.cctr||0)*100).toFixed(2)+'%', (x.e*100).toFixed(2)+'%', x.missed])));
 
@@ -972,11 +1009,34 @@ function segTable(el, rows, cmp, nameMap){
 }
 function renderDevices(cmp){
   segTable('tbl-device', D.device, cmp, k => ({DESKTOP:'Desktop', MOBILE:'Mobile', TABLET:'Tablet'})[k] || k);
-  mkChart('ch-device', {type:'doughnut', data:{labels:D.device.map(x=>x.k.toLowerCase()), datasets:[{data:D.device.map(x=>x.cc),
-    backgroundColor:['#1d3c6e','#4285f4','#9db6e3'], borderWidth:2, borderColor:'#fff'}]},
+  mkChart('ch-device', {type:'doughnut', data:{labels:D.device.map(x=>String(x.k??'unknown').toLowerCase()), datasets:[{data:D.device.map(x=>x.cc),
+    backgroundColor:['#1f332a','#a8814f','#d8ccb4'], borderWidth:2, borderColor:'#fff'}]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{position:'right', labels:{boxWidth:12, font:{size:11}}}}}});
 }
 function renderCountries(cmp){ segTable('tbl-country', D.country, cmp, k => (k||'').toUpperCase()); }
+
+/* Site sections */
+function renderSections(cmp){
+  segTable('tbl-sections', D.sections || [], cmp);
+}
+/* Weekday pattern (from the already-loaded daily trend) */
+function renderWeekday(){
+  const {cur, prev} = trendSplit();
+  const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const avg = rows => {
+    const sum = Array(7).fill(0), n = Array(7).fill(0);
+    rows.forEach(x => { const wd = (new Date(x.d+'T00:00:00Z').getUTCDay()+6)%7; sum[wd]+=x.c; n[wd]++; });
+    return sum.map((s,i)=> n[i] ? s/n[i] : null);
+  };
+  const a = avg(cur), b = avg(prev);
+  const ds = [{label:'Current', data:a, backgroundColor:'#a8814f', borderRadius:3}];
+  if (cmpOn()) ds.push({label: cmpMode()==='yoy'?'Last year':'Previous', data:b, backgroundColor:'#d8ccb4', borderRadius:3});
+  mkChart('ch-weekday', {type:'bar', data:{labels:names, datasets:ds},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}}, tooltip:{callbacks:{label:c=>c.dataset.label+': '+fmtF(c.parsed.y)+' avg clicks/day'}}},
+      scales:{x:{grid:{display:false}, ticks:{color:'#98907d', font:{size:11}}},
+              y:{beginAtZero:true, ticks:{callback:v=>fmt(v), color:'#98907d', font:{size:11}}, grid:{color:'#ece7da'}}}}});
+}
 function renderSTypes(){ segTable('tbl-stype', D.stype, false); }
 
 /* ═══════════════ TABS / CONTROLS / MODAL ═══════════════ */
@@ -986,7 +1046,7 @@ document.querySelectorAll('nav.tabs button').forEach(b => b.addEventListener('cl
 }));
 $('preset').addEventListener('change', () => $('custom-dates').classList.toggle('show', $('preset').value==='custom'));
 $('run-btn').addEventListener('click', loadAll);
-$('cmp-chk').addEventListener('change', () => { if (D.trend) { renderKPIs($('cmp-chk').checked); renderTrend($('cmp-chk').checked); } });
+$('cmp-sel').addEventListener('change', () => { if (D.trend) loadAll(); });
 
 function openModal(){
   $('brand-input').value = brandRe;
@@ -1039,8 +1099,8 @@ async function openDrill(kind, key){
       {label:'Impressions', data:trend.map(x=>x.i), borderColor:C.impr, borderWidth:2, pointRadius:0, tension:.3, yAxisID:'y2'}
     ]}, options:{responsive:true, maintainAspectRatio:false, interaction:{mode:'index', intersect:false},
       plugins:{legend:{position:'bottom', labels:{boxWidth:12, font:{size:11}}}},
-      scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:9, color:'#8a90a0', font:{size:10}}},
-              y:{beginAtZero:true, ticks:{color:C.clicks, font:{size:10}, callback:v=>fmt(v)}, grid:{color:'#eef0f5'}},
+      scales:{x:{grid:{display:false}, ticks:{maxTicksLimit:9, color:'#98907d', font:{size:10}}},
+              y:{beginAtZero:true, ticks:{color:C.clicks, font:{size:10}, callback:v=>fmt(v)}, grid:{color:'#ece7da'}},
               y2:{position:'right', beginAtZero:true, ticks:{color:C.impr, font:{size:10}, callback:v=>fmt(v)}, grid:{display:false}}}}});
     const isQ = kind === 'q';
     $('dr-table').innerHTML = brk.length ? `<table><thead><tr><th class="txt">${isQ ? 'Ranking URL' : 'Query'}</th><th>Clicks</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead><tbody>` +
@@ -1070,7 +1130,7 @@ function renderRich(){
   const m = D.rich && D.rich.__err === undefined ? D.rich[0] : null;
   if (!m){ el.innerHTML = `<div class="empty">${D.rich && D.rich.__err ? 'Not available: ' + esc(D.rich.__err) : 'No data'}</div>`; return; }
   const feats = [
-    ['Merchant listings', m.i_ml, m.c_ml], ['Product snippets', m.i_ps, m.c_ps],
+    ['Merchant listings', m.i_ml, m.c_ml], ['Organic shopping', m.i_os, m.c_os], ['Product snippets', m.i_ps, m.c_ps],
     ['Review snippets', m.i_rs, m.c_rs], ['Video results', m.i_v, m.c_v], ['FAQ rich results', m.i_faq, m.c_faq]
   ];
   el.innerHTML = `<table><thead><tr><th class="txt">Search appearance</th><th>Impressions</th><th>Share of all impr</th><th>Clicks</th><th>CTR</th></tr></thead><tbody>` +
