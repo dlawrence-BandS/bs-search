@@ -373,45 +373,42 @@ a.ext:hover{color:var(--m-clicks)}
 <div class="modal-bg" id="modal-bg">
   <div class="modal">
     <h2>BigQuery connection</h2>
-    <p>Upload the <strong>service account key JSON</strong> below (or paste it). It's stored only in this browser's localStorage &mdash; it is never written into the repo, so Google's secret scanning won't keep killing the key.</p>
+    <p>This dashboard queries BigQuery directly with <strong>your Google account</strong> &mdash; no key files. Click Run and sign in with your @barkerandstonehouse login when prompted.</p>
     <div class="field">
-      <label>Upload key file</label>
-      <input type="file" id="key-file" accept=".json,application/json">
-    </div>
-    <div class="field">
-      <label>Or paste the JSON</label>
-      <textarea id="key-input" placeholder='{"type":"service_account", ...}'></textarea>
+      <label>Signed-in status</label>
+      <div id="key-state" style="padding:6px 0"></div>
     </div>
     <div class="field">
       <label>Brand term regex (used for the brand / non-brand split)</label>
       <input type="text" id="brand-input">
     </div>
     <div class="row">
-      <span id="key-state"></span>
       <span class="sp"></span>
-      <button class="btn danger" id="key-clear">Clear key</button>
+      <button class="btn danger" id="key-clear">Sign out</button>
       <button class="btn" id="key-cancel">Cancel</button>
       <button class="btn prime" id="key-save">Save</button>
     </div>
   </div>
 </div>
 
+<script src="https://accounts.google.com/gsi/client"></script>
 <script>
 /* ═══════════════ CONFIG ═══════════════ */
 const PROJECT = 'commanding-air-450109-p0';
 const DATASET = 'searchconsole';
+const CLIENT_ID = '46227372300-rk63ag0caqgd7n12gjd0nt7f2qi7llqr.apps.googleusercontent.com';
 const RAW_T = "`" + PROJECT + "." + DATASET + ".searchdata_site_impression`";
 const RAW_U = "`" + PROJECT + "." + DATASET + ".searchdata_url_impression`";
 const VIEW_T = "`" + PROJECT + "." + DATASET + ".v_gsc_site`";
 const VIEW_U = "`" + PROJECT + "." + DATASET + ".v_gsc_url`";
 let T = RAW_T, U = RAW_U, usingBackfill = false;
 const DEFAULT_BRAND = "barker|stone\\s*house|b\\s*&\\s*s|barkerand";
-const LS_KEY = 'gsc_sa_key', LS_BRAND = 'gsc_brand_regex', LS_LOC = 'gsc_bq_location', LS_VIEWS = 'gsc_saved_views', LS_AI = 'gsc_anthropic_key';
+const LS_AUTH = 'gsc_google_auth', LS_BRAND = 'gsc_brand_regex', LS_LOC = 'gsc_bq_location', LS_VIEWS = 'gsc_saved_views', LS_AI = 'gsc_anthropic_key';
 document.getElementById('ft-ds').textContent = PROJECT + '.' + DATASET;
 
 /* ═══════════════ STATE ═══════════════ */
-let saKey = null, accessToken = null, tokenExpiry = 0;
-try { saKey = JSON.parse(localStorage.getItem(LS_KEY) || 'null'); } catch(e){}
+let accessToken = null, tokenExpiry = 0;
+let hasGrant = !!localStorage.getItem(LS_AUTH);
 let brandRe = localStorage.getItem(LS_BRAND) || DEFAULT_BRAND;
 let D = {};                 // all query results for the current run
 let qState = {sort:'cc', dir:-1, filter:''};
@@ -451,25 +448,49 @@ function setStatus(msg, err=false){ const s=$('status'); s.textContent=msg; s.cl
 function showBanner(msg, isErr=false){ const b=$('banner'); b.innerHTML=msg; b.className='banner show'+(isErr?' error':''); }
 function hideBanner(){ $('banner').className='banner'; }
 
-/* ═══════════════ AUTH (service account → OAuth token in-browser) ═══════════════ */
-const b64url = s => btoa(s).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-const b64urlBuf = ab => btoa(String.fromCharCode(...new Uint8Array(ab))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
+/* ═══════════════ AUTH (Google sign-in via GIS token client) ═══════════════ */
+let tokenClient = null, tokenPending = null;
+function initTokenClient(){
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: 'https://www.googleapis.com/auth/bigquery.readonly',
+    callback: resp => {
+      const p = tokenPending; tokenPending = null;
+      if (!p) return;
+      if (resp.error){ p.reject(new Error(resp.error_description || resp.error)); return; }
+      accessToken = resp.access_token;
+      tokenExpiry = Date.now() + (resp.expires_in ? resp.expires_in*1000 : 3600000);
+      hasGrant = true; localStorage.setItem(LS_AUTH, '1');
+      p.resolve(accessToken);
+    },
+    error_callback: err => {
+      const p = tokenPending; tokenPending = null;
+      if (p) p.reject(new Error(err.message || err.type || 'Sign-in cancelled'));
+    }
+  });
+}
+function requestToken(promptVal){
+  return new Promise((resolve, reject) => {
+    tokenPending = {resolve, reject};
+    tokenClient.requestAccessToken({prompt: promptVal});
+  });
+}
 async function getToken(){
   if (accessToken && Date.now() < tokenExpiry - 60000) return accessToken;
-  const now = Math.floor(Date.now()/1000);
-  const hdr = b64url(JSON.stringify({alg:'RS256',typ:'JWT'}));
-  const clm = b64url(JSON.stringify({iss:saKey.client_email, scope:'https://www.googleapis.com/auth/bigquery.readonly', aud:'https://oauth2.googleapis.com/token', exp:now+3600, iat:now}));
-  const unsigned = hdr + '.' + clm;
-  const pem = saKey.private_key.replace(/-----BEGIN PRIVATE KEY-----|-----END PRIVATE KEY-----|\s/g,'');
-  const bin = Uint8Array.from(atob(pem), c=>c.charCodeAt(0));
-  const key = await crypto.subtle.importKey('pkcs8', bin.buffer, {name:'RSASSA-PKCS1-v1_5', hash:'SHA-256'}, false, ['sign']);
-  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(unsigned));
-  const jwt = unsigned + '.' + b64urlBuf(sig);
-  const r = await fetch('https://oauth2.googleapis.com/token', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:'grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion='+jwt});
-  const d = await r.json();
-  if (!d.access_token) throw new Error(d.error_description || 'Auth failed — check the service account key');
-  accessToken = d.access_token; tokenExpiry = Date.now() + d.expires_in*1000;
-  return accessToken;
+  if (typeof google === 'undefined' || !google.accounts) throw new Error('Google sign-in library failed to load — check your connection and refresh');
+  if (!tokenClient) initTokenClient();
+  if (hasGrant){
+    try { return await requestToken(''); }        // silent refresh — no popup if session is live
+    catch(e){ /* fall through to interactive */ }
+  }
+  return await requestToken('consent');            // interactive popup
+}
+function signOut(){
+  if (accessToken && typeof google !== 'undefined' && google.accounts) {
+    try { google.accounts.oauth2.revoke(accessToken, ()=>{}); } catch(e){}
+  }
+  accessToken = null; tokenExpiry = 0; hasGrant = false;
+  localStorage.removeItem(LS_AUTH);
 }
 
 /* ═══════════════ QUERY RUNNER (with dataset-location fallback) ═══════════════ */
@@ -632,7 +653,6 @@ function buildSQL(r){
 }
 /* ═══════════════ LOAD ═══════════════ */
 async function loadAll(){
-  if (!saKey){ openModal(); showBanner('Paste your BigQuery service account key to connect — click <strong>⚙ Connection</strong> in the header.', true); return; }
   hideBanner();
   $('run-btn').disabled = true;
   try {
@@ -969,49 +989,19 @@ $('run-btn').addEventListener('click', loadAll);
 $('cmp-chk').addEventListener('change', () => { if (D.trend) { renderKPIs($('cmp-chk').checked); renderTrend($('cmp-chk').checked); } });
 
 function openModal(){
-  $('key-input').value = '';
-  $('key-file').value = '';
-  $('key-file').classList.remove('ok');
   $('brand-input').value = brandRe;
-  $('key-state').textContent = saKey ? 'Current key: ' + saKey.client_email : 'No key saved in this browser';
+  $('key-state').textContent = hasGrant ? 'Signed in with Google — token refreshes automatically' : 'Not signed in — click Run and a Google sign-in window will appear';
   $('modal-bg').classList.add('show');
 }
-$('key-file').addEventListener('change', () => {
-  const f = $('key-file').files[0];
-  if (!f) return;
-  const rd = new FileReader();
-  rd.onload = () => {
-    try {
-      const k = JSON.parse(rd.result);
-      if (!k.private_key || !k.client_email) throw new Error('missing fields');
-      $('key-input').value = rd.result.trim();
-      $('key-file').classList.add('ok');
-      $('key-state').textContent = 'Loaded: ' + k.client_email + ' — click Save';
-    } catch(e){
-      $('key-file').classList.remove('ok');
-      $('key-state').textContent = 'That file isn\u2019t a valid service account JSON';
-    }
-  };
-  rd.onerror = () => { $('key-state').textContent = 'Couldn\u2019t read that file'; };
-  rd.readAsText(f);
-});
 $('key-btn').addEventListener('click', openModal);
 $('key-cancel').addEventListener('click', () => $('modal-bg').classList.remove('show'));
 $('modal-bg').addEventListener('click', e => { if (e.target === $('modal-bg')) $('modal-bg').classList.remove('show'); });
-$('key-clear').addEventListener('click', () => { localStorage.removeItem(LS_KEY); saKey = null; accessToken = null; $('key-state').textContent = 'Key cleared'; });
+$('key-clear').addEventListener('click', () => { signOut(); $('key-state').textContent = 'Signed out'; });
 $('key-save').addEventListener('click', () => {
-  const txt = $('key-input').value.trim();
-  if (txt){
-    try { const k = JSON.parse(txt);
-      if (!k.private_key || !k.client_email) throw new Error('missing fields');
-      saKey = k; accessToken = null;
-      localStorage.setItem(LS_KEY, JSON.stringify(k));
-    } catch(e){ $('key-state').textContent = 'That doesn\u2019t look like a valid service account JSON'; return; }
-  }
   brandRe = $('brand-input').value.trim() || DEFAULT_BRAND;
   localStorage.setItem(LS_BRAND, brandRe);
   $('modal-bg').classList.remove('show');
-  if (saKey) loadAll();
+  if (hasGrant) loadAll();
 });
 
 /* ═══════════════ DRILL-DOWN DRAWER ═══════════════ */
@@ -1194,8 +1184,8 @@ $('ai-q').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKe
   $('date-to').value = iso(end);
   $('date-from').value = iso(addDays(end, -27));
   renderViews('');
-  if (saKey) loadAll();
-  else showBanner('First run: click <strong>⚙ Connection</strong> (top right) and upload the BigQuery service account key JSON file. It lives in localStorage on this machine only — never in the repo.');
+  if (hasGrant) loadAll();   // silent token refresh — no popup if your Google session is live
+  else showBanner('First run: click <strong>Run</strong> and sign in with your Google account when prompted. No key files needed — access uses your own BigQuery permissions.');
 })();
 </script>
 </body>
